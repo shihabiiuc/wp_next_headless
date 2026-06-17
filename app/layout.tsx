@@ -5,6 +5,7 @@ import Image from "next/image";
 import "./global.css";
 
 import SiteHeader from "@/components/SiteHeader";
+import SiteFooter from "@/components/SiteFooter";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 
@@ -25,20 +26,7 @@ export default function RootLayout({
 
         <main>{children}</main>
 
-        <footer className="site-footer">
-          <div className="container">
-            <p>
-              Content from{" "}
-              <a href="https://wordpress.org" target="_blank" rel="noreferrer">
-                WordPress
-              </a>{" "}
-              · Rendered by{" "}
-              <a href="https://nextjs.org" target="_blank" rel="noreferrer">
-                Next.js
-              </a>
-            </p>
-          </div>
-        </footer>
+        <SiteFooter />
       </body>
     </html>
   );
