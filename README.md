@@ -2,17 +2,17 @@
 
 ## What's included
 
-| File | Purpose |
-|---|---|
-| `lib/wordpress.ts` | GraphQL client + all queries (pages, posts) |
-| `app/layout.tsx` | Root layout with header nav + footer |
-| `app/globals.css` | All styles |
-| `app/page.tsx` | Homepage — lists WP pages + recent posts |
-| `app/pages/[slug]/page.tsx` | Dynamic route for every WP page |
-| `app/posts/page.tsx` | Blog listing — all 11 posts |
-| `app/posts/[slug]/page.tsx` | Dynamic route for every WP post |
-| `next.config.ts` | Allows WP image domain |
-| `.env.local` | GraphQL endpoint env var |
+| File                        | Purpose                                     |
+| --------------------------- | ------------------------------------------- |
+| `lib/wordpress.ts`          | GraphQL client + all queries (pages, posts) |
+| `app/layout.tsx`            | Root layout with header nav + footer        |
+| `app/globals.css`           | All styles                                  |
+| `app/page.tsx`              | Homepage — lists WP pages + recent posts    |
+| `app/[slug]/page.tsx`       | Dynamic route for every WP page             |
+| `app/posts/page.tsx`        | Blog listing — all 11 posts                 |
+| `app/posts/[slug]/page.tsx` | Dynamic route for every WP post             |
+| `next.config.ts`            | Allows WP image domain                      |
+| `.env.local`                | GraphQL endpoint env var                    |
 
 ---
 
@@ -31,8 +31,7 @@ your-nextjs-project/
 │   ├── globals.css        ← replace
 │   ├── layout.tsx         ← replace
 │   ├── page.tsx           ← replace
-│   ├── pages/
-│   │   └── [slug]/
+│   ├── [slug]/
 │   │       └── page.tsx   ← new
 │   └── posts/
 │       ├── page.tsx       ← new
@@ -47,7 +46,7 @@ your-nextjs-project/
 Create (or edit) `.env.local` in your project root:
 
 ```
-NEXT_PUBLIC_WORDPRESS_URL=https://blanchedalmond-bison-874584.hostingersite.com/graphql
+NEXT_PUBLIC_WORDPRESS_URL=https://yoursite.com/graphql
 ```
 
 ### 3. Run the dev server
@@ -72,23 +71,26 @@ Browser → Next.js (React) → WPGraphQL → WordPress DB
 
 ## URL structure
 
-| URL | Content |
-|---|---|
-| `/` | Homepage with all pages + recent posts |
-| `/pages/about` | Your WordPress "About" page |
-| `/pages/services` | Your WordPress "Services" page |
-| `/pages/gallery` | Your WordPress "Gallery" page |
-| `/pages/contact` | Your WordPress "Contact" page |
-| `/posts` | All 11 blog posts |
-| `/posts/your-post-slug` | Individual post |
+| URL                     | Content                                |
+| ----------------------- | -------------------------------------- |
+| `/`                     | Homepage with all pages + recent posts |
+| `/about`                | Your WordPress "About" page            |
+| `/services`             | Your WordPress "Services" page         |
+| `/gallery`              | Your WordPress "Gallery" page          |
+| `/contact`              | Your WordPress "Contact" page          |
+| `/posts`                | All 11 blog posts                      |
+| `/posts/your-post-slug` | Individual post                        |
 
 ## Troubleshooting
 
 **GraphQL returns errors?**
+
 - Log into WordPress → WPGraphQL → Settings → make sure "Public Introspection" is enabled.
 
 **Images not loading?**
+
 - The `next.config.ts` already allows your Hostinger domain. If you change domains, update `hostname` in that file.
 
 **Page not found for a WP page?**
+
 - Check the slug in WordPress (Pages → Edit → Permalink). The slug in the URL must match exactly.
