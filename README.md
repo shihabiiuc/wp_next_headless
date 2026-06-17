@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Headless WordPress + Next.js Setup
 
-## Getting Started
+## What's included
 
-First, run the development server:
+| File | Purpose |
+|---|---|
+| `lib/wordpress.ts` | GraphQL client + all queries (pages, posts) |
+| `app/layout.tsx` | Root layout with header nav + footer |
+| `app/globals.css` | All styles |
+| `app/page.tsx` | Homepage — lists WP pages + recent posts |
+| `app/pages/[slug]/page.tsx` | Dynamic route for every WP page |
+| `app/posts/page.tsx` | Blog listing — all 11 posts |
+| `app/posts/[slug]/page.tsx` | Dynamic route for every WP post |
+| `next.config.ts` | Allows WP image domain |
+| `.env.local` | GraphQL endpoint env var |
+
+---
+
+## Setup steps
+
+### 1. Copy files into your Next.js project
+
+Copy everything into the root of your existing Next.js project.
+Your project already has `app/` and `app/globals.css` — **replace** them.
+
+```
+your-nextjs-project/
+├── lib/
+│   └── wordpress.ts       ← new
+├── app/
+│   ├── globals.css        ← replace
+│   ├── layout.tsx         ← replace
+│   ├── page.tsx           ← replace
+│   ├── pages/
+│   │   └── [slug]/
+│   │       └── page.tsx   ← new
+│   └── posts/
+│       ├── page.tsx       ← new
+│       └── [slug]/
+│           └── page.tsx   ← new
+├── next.config.ts         ← replace
+└── .env.local             ← new
+```
+
+### 2. Add the env variable
+
+Create (or edit) `.env.local` in your project root:
+
+```
+NEXT_PUBLIC_WORDPRESS_URL=https://blanchedalmond-bison-874584.hostingersite.com/graphql
+```
+
+### 3. Run the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit http://localhost:3000 — your WordPress content will appear!
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## How it works
 
-## Learn More
+```
+Browser → Next.js (React) → WPGraphQL → WordPress DB
+```
 
-To learn more about Next.js, take a look at the following resources:
+1. **`lib/wordpress.ts`** sends GraphQL POST requests to `/graphql` on your WP site.
+2. Each page/post route calls the relevant query (`getAllPages`, `getPostBySlug`, etc.).
+3. `next: { revalidate: 60 }` on each fetch means pages are rebuilt from WP every 60 seconds (ISR), so the site stays fast without needing a full rebuild when you publish content.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## URL structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| URL | Content |
+|---|---|
+| `/` | Homepage with all pages + recent posts |
+| `/pages/about` | Your WordPress "About" page |
+| `/pages/services` | Your WordPress "Services" page |
+| `/pages/gallery` | Your WordPress "Gallery" page |
+| `/pages/contact` | Your WordPress "Contact" page |
+| `/posts` | All 11 blog posts |
+| `/posts/your-post-slug` | Individual post |
 
-## Deploy on Vercel
+## Troubleshooting
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**GraphQL returns errors?**
+- Log into WordPress → WPGraphQL → Settings → make sure "Public Introspection" is enabled.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Images not loading?**
+- The `next.config.ts` already allows your Hostinger domain. If you change domains, update `hostname` in that file.
+
+**Page not found for a WP page?**
+- Check the slug in WordPress (Pages → Edit → Permalink). The slug in the URL must match exactly.

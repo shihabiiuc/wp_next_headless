@@ -1,65 +1,131 @@
-import Image from "next/image";
+import Link from "next/link";
+import {
+  getRecentPosts,
+  getAllPages,
+  formatDate,
+  stripHtml,
+} from "@/lib/wordpress";
 
-export default function Home() {
+export default async function HomePage() {
+  const [pages, posts] = await Promise.all([getAllPages(), getRecentPosts(6)]);
+
+  // filter out the "home" page itself from the listing
+  const sitePages = pages.filter((p) => p.slug !== "home");
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <>
+      {/* Hero */}
+      <section className="hero">
+        <div className="container">
+          <h1>
+            Content from WordPress,
+            <br />
+            speed from Next.js.
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p>
+            All pages and posts are pulled live from your WordPress GraphQL API
+            and rendered as a blazing-fast React app.
           </p>
+          <div className="btn-row">
+            <Link href="/posts" className="btn btn-primary">
+              Read the blog →
+            </Link>
+            <Link href="/about" className="btn btn-ghost">
+              About us
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </section>
+
+      {/* Pages */}
+      {sitePages.length > 0 && (
+        <section className="section">
+          <div className="container">
+            <div className="section-hd">
+              <h2>Site Pages</h2>
+              <p>{sitePages.length} pages pulled directly from WordPress.</p>
+            </div>
+            <div className="grid">
+              {sitePages.map((page) => (
+                <Link key={page.id} href={`/${page.slug}`} className="card">
+                  {page.featuredImage ? (
+                    <img
+                      src={page.featuredImage.node.sourceUrl}
+                      alt={page.featuredImage.node.altText || page.title}
+                      className="card-thumb"
+                    />
+                  ) : (
+                    <div className="card-placeholder">📄</div>
+                  )}
+                  <div className="card-body">
+                    <span className="card-tag">Page</span>
+                    <span className="card-title">{page.title}</span>
+                    {page.excerpt && (
+                      <p className="card-excerpt">
+                        {stripHtml(page.excerpt).slice(0, 110)}…
+                      </p>
+                    )}
+                    <span className="card-cta">Visit page →</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Recent posts */}
+      {posts.length > 0 && (
+        <section className="section" style={{ background: "var(--surface)" }}>
+          <div className="container">
+            <div className="section-hd">
+              <h2>Latest Posts</h2>
+              <p>Your {posts.length} most-recent WordPress posts.</p>
+            </div>
+            <div className="grid">
+              {posts.map((post) => (
+                <Link
+                  key={post.id}
+                  href={`/posts/${post.slug}`}
+                  className="card"
+                >
+                  {post.featuredImage ? (
+                    <img
+                      src={post.featuredImage.node.sourceUrl}
+                      alt={post.featuredImage.node.altText || post.title}
+                      className="card-thumb"
+                    />
+                  ) : (
+                    <div className="card-placeholder">📝</div>
+                  )}
+                  <div className="card-body">
+                    {post.categories?.nodes[0] && (
+                      <span className="card-tag">
+                        {post.categories.nodes[0].name}
+                      </span>
+                    )}
+                    <span className="card-title">{post.title}</span>
+                    {post.excerpt && (
+                      <p className="card-excerpt">
+                        {stripHtml(post.excerpt).slice(0, 110)}…
+                      </p>
+                    )}
+                    <div className="card-meta">
+                      {formatDate(post.date)}
+                      {post.author?.node.name && ` · ${post.author.node.name}`}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <div style={{ textAlign: "center", paddingTop: "2rem" }}>
+              <Link href="/posts" className="btn btn-ghost">
+                View all posts →
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+    </>
   );
 }
